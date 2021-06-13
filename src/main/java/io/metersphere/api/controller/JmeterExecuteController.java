@@ -25,6 +25,12 @@ public class JmeterExecuteController {
         return jmeterExecuteService.run(runRequest, bodyFiles, jarFiles);
     }
 
+    @PostMapping(value = "/api/start")
+    public String apiStartRun(@RequestBody RunRequest runRequest) {
+        LogUtil.info("接收到测试请求 start ");
+        return jmeterExecuteService.runStart(runRequest);
+    }
+
     @GetMapping("/status")
     public String getStatus() {
         return "OK";

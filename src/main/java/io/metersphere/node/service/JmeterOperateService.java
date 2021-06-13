@@ -59,6 +59,10 @@ public class JmeterOperateService {
 
         DockerClientService.startContainer(dockerClient, containerId);
         LogUtil.info("Container create started containerId: " + containerId);
+
+        String topic = testRequest.getEnv().getOrDefault("LOG_TOPIC", "JMETER_LOGS");
+        String reportId = testRequest.getEnv().get("REPORT_ID");
+
         dockerClient.waitContainerCmd(containerId)
                 .exec(new WaitContainerResultCallback() {
                     @Override
@@ -68,9 +72,7 @@ public class JmeterOperateService {
                             if (DockerClientService.existContainer(dockerClient, containerId) > 0) {
                                 DockerClientService.removeContainer(dockerClient, containerId);
                             }
-                            // 上传结束消息，取保正常结束
-                            String topic = testRequest.getEnv().getOrDefault("LOG_TOPIC", "JMETER_LOGS");
-                            String reportId = testRequest.getEnv().get("REPORT_ID");
+                            // 上传结束消息
                             String[] contents = new String[]{reportId, "none", "0", "Remove container completed"};
                             String log = StringUtils.join(contents, " ");
                             kafkaProducer.sendMessage(topic, log);
@@ -90,7 +92,15 @@ public class JmeterOperateService {
                 .exec(new InvocationBuilder.AsyncResultCallback<Frame>() {
                     @Override
                     public void onNext(Frame item) {
-                        LogUtil.info(new String(item.getPayload()).trim());
+                        String log = new String(item.getPayload()).trim();
+                        String oomMessage = "There is insufficient memory for the Java Runtime Environment to continue.";
+                        if (StringUtils.contains(log, oomMessage)) {
+                            // oom 退出
+                            String[] contents = new String[]{reportId, "none", "0", oomMessage};
+                            String message = StringUtils.join(contents, " ");
+                            kafkaProducer.sendMessage(topic, message);
+                        }
+                        LogUtil.info(log);
                     }
                 });
     }

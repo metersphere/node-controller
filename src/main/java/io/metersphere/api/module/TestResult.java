@@ -36,6 +36,8 @@ public class TestResult {
 
     private int passAssertions = 0;
 
+    private String console;
+
     private List<ScenarioResult> scenarios = new ArrayList<>();
 
     public void addError(int count) {

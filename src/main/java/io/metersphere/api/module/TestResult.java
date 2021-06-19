@@ -38,6 +38,8 @@ public class TestResult {
 
     private String console;
 
+    private String runningDebugSampler;
+
     private List<ScenarioResult> scenarios = new ArrayList<>();
 
     public void addError(int count) {

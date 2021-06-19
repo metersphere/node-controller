@@ -26,7 +26,7 @@ public class AppStartListener implements ApplicationListener<ApplicationReadyEve
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent applicationReadyEvent) {
-        System.out.println("================= NODE 应用启动 =================");
+        System.out.println("================= NODE 应用启动 START =================");
         System.setProperty("jmeter.home", jmeterHome);
         loadJars();
         initPythonEnv();

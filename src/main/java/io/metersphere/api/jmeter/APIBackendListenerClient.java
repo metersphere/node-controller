@@ -96,41 +96,46 @@ public class APIBackendListenerClient extends AbstractBackendListenerClient impl
         final Map<String, ScenarioResult> scenarios = new LinkedHashMap<>();
         queue.forEach(result -> {
             // 线程名称: <场景名> <场景Index>-<请求Index>, 例如：Scenario 2-1
-            String scenarioName = StringUtils.substringBeforeLast(result.getThreadName(), THREAD_SPLIT);
-            String index = StringUtils.substringAfterLast(result.getThreadName(), THREAD_SPLIT);
-            String scenarioId = StringUtils.substringBefore(index, ID_SPLIT);
-            ScenarioResult scenarioResult;
-            if (!scenarios.containsKey(scenarioId)) {
-                scenarioResult = new ScenarioResult();
-                try {
-                    scenarioResult.setId(Integer.parseInt(scenarioId));
-                } catch (Exception e) {
-                    scenarioResult.setId(0);
-                    LogUtil.error("场景ID转换异常: " + e.getMessage());
+            if (StringUtils.equals(result.getSampleLabel(), "RunningDebugSampler")) {
+                String evnStr = result.getResponseDataAsString();
+                testResult.setRunningDebugSampler(result.getResponseDataAsString());
+             } else {
+                String scenarioName = StringUtils.substringBeforeLast(result.getThreadName(), THREAD_SPLIT);
+                String index = StringUtils.substringAfterLast(result.getThreadName(), THREAD_SPLIT);
+                String scenarioId = StringUtils.substringBefore(index, ID_SPLIT);
+                ScenarioResult scenarioResult;
+                if (!scenarios.containsKey(scenarioId)) {
+                    scenarioResult = new ScenarioResult();
+                    try {
+                        scenarioResult.setId(Integer.parseInt(scenarioId));
+                    } catch (Exception e) {
+                        scenarioResult.setId(0);
+                        LogUtil.error("场景ID转换异常: " + e.getMessage());
+                    }
+                    scenarioResult.setName(scenarioName);
+                    scenarios.put(scenarioId, scenarioResult);
+                } else {
+                    scenarioResult = scenarios.get(scenarioId);
                 }
-                scenarioResult.setName(scenarioName);
-                scenarios.put(scenarioId, scenarioResult);
-            } else {
-                scenarioResult = scenarios.get(scenarioId);
+
+                if (result.isSuccessful()) {
+                    scenarioResult.addSuccess();
+                    testResult.addSuccess();
+                } else {
+                    scenarioResult.addError(result.getErrorCount());
+                    testResult.addError(result.getErrorCount());
+                }
+
+                RequestResult requestResult = getRequestResult(result);
+                scenarioResult.getRequestResults().add(requestResult);
+                scenarioResult.addResponseTime(result.getTime());
+
+                testResult.addPassAssertions(requestResult.getPassAssertions());
+                testResult.addTotalAssertions(requestResult.getTotalAssertions());
+
+                scenarioResult.addPassAssertions(requestResult.getPassAssertions());
+                scenarioResult.addTotalAssertions(requestResult.getTotalAssertions());
             }
-
-            if (result.isSuccessful()) {
-                scenarioResult.addSuccess();
-                testResult.addSuccess();
-            } else {
-                scenarioResult.addError(result.getErrorCount());
-                testResult.addError(result.getErrorCount());
-            }
-
-            RequestResult requestResult = getRequestResult(result);
-            scenarioResult.getRequestResults().add(requestResult);
-            scenarioResult.addResponseTime(result.getTime());
-
-            testResult.addPassAssertions(requestResult.getPassAssertions());
-            testResult.addTotalAssertions(requestResult.getTotalAssertions());
-
-            scenarioResult.addPassAssertions(requestResult.getPassAssertions());
-            scenarioResult.addTotalAssertions(requestResult.getTotalAssertions());
         });
         testResult.getScenarios().addAll(scenarios.values());
         testResult.getScenarios().sort(Comparator.comparing(ScenarioResult::getId));

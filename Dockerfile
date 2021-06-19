@@ -7,7 +7,7 @@ RUN mkdir -p dependency && (cd dependency; jar -xf ../*.jar)
 
 FROM metersphere/fabric8-java-alpine-openjdk8-jre
 
-MAINTAINER FIT2CLOUD <support@fit2cloud.com>
+LABEL maintainer="FIT2CLOUD <support@fit2cloud.com>"
 
 ARG MS_VERSION=dev
 ARG DEPENDENCY=/workspace/app/dependency
@@ -18,6 +18,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
 RUN mkdir -p /opt/jmeter/lib/junit
 COPY target/classes/jmeter/ /opt/jmeter/
+COPY backend/target/classes/jmeter/ /app/jmeter/
 
 ENV JAVA_CLASSPATH=/app:/app/lib/*
 ENV JAVA_MAIN_CLASS=io.metersphere.Application

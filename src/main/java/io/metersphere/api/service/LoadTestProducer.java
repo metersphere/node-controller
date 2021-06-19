@@ -1,5 +1,6 @@
 package io.metersphere.api.service;
 
+import io.metersphere.api.config.KafkaConfig;
 import io.metersphere.api.config.KafkaProperties;
 import io.metersphere.api.jmeter.utils.CommonBeanFactory;
 import io.metersphere.api.jmeter.utils.MSException;
@@ -15,7 +16,6 @@ import java.net.Socket;
 
 @Service
 public class LoadTestProducer {
-    private static final String topic = "ms-api-exec-topic";
 
     public void checkKafka() {
         KafkaProperties kafkaProperties = CommonBeanFactory.getBean(KafkaProperties.class);
@@ -48,6 +48,6 @@ public class LoadTestProducer {
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendMessage(String report) {
-        this.kafkaTemplate.send(topic, report);
+        this.kafkaTemplate.send(KafkaConfig.testTopic, report);
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.kafka.config.TopicBuilder;
 
 @Configuration
 public class KafkaConfig {
-    private final String testTopic = "ms-api-exec-topic";
+    public final static String testTopic = "ms-api-exec-topic";
 
     @Bean
     public NewTopic apiExecTopic() {

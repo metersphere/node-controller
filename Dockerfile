@@ -15,10 +15,10 @@ ARG DEPENDENCY=/workspace/app/dependency
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
+COPY target/classes/jmeter/ /opt/jmeter/
 
 RUN mkdir -p /opt/jmeter/lib/junit
-COPY target/classes/jmeter/ /opt/jmeter/
-COPY target/classes/jmeter/ /app/jmeter/
+RUN cp -rf /opt/jmeter/ /app/jmeter/
 
 ENV JAVA_CLASSPATH=/app:/app/lib/*
 ENV JAVA_MAIN_CLASS=io.metersphere.Application

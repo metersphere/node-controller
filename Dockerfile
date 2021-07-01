@@ -16,7 +16,7 @@ COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-RUN cp -rf /app/jmeter /opt/
+RUN mv -rf /app/jmeter /opt/
 RUN mkdir -p /opt/jmeter/lib/junit
 
 ENV JAVA_CLASSPATH=/app:/app/lib/*

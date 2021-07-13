@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -124,15 +123,11 @@ public class JmeterOperateService {
                 //1,建立tcp
                 String ip = ipAndPort[0];
                 int port = Integer.parseInt(ipAndPort[1]);
-                Socket soc = new Socket();
-                soc.connect(new InetSocketAddress(ip, port), 1000); // 1s timeout
-                //2.输入内容
-                String content = "1010";
-                byte[] bs = content.getBytes();
-                OutputStream os = soc.getOutputStream();
-                os.write(bs);
-                //3.关闭
-                soc.close();
+                try (
+                        Socket soc = new Socket()
+                ) {
+                    soc.connect(new InetSocketAddress(ip, port), 1000); // 1s timeout
+                }
             }
         } catch (Exception e) {
             LogUtil.error(e);
